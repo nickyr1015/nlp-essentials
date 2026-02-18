@@ -272,7 +272,7 @@ def regular_expressions(text):
 if __name__ == "__main__":
    
     data = chronicles_of_narnia("dat/chronicles_of_narnia.txt")
-    # pprint.pprint(data, width=100, sort_dicts=False)
+    pprint.pprint(data, width=100, sort_dicts=False)
 
     tests = [
     # ---------- email (valid) ----------
@@ -331,6 +331,6 @@ if __name__ == "__main__":
     "Smith, 2025",            # year too late
 ]
 
-for t in tests:
-    print(f"{t!r:35} -> {regular_expressions(t)}")
+# for t in tests:
+#     print(f"{t!r:35} -> {regular_expressions(t)}")
 
