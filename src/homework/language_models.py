@@ -25,34 +25,16 @@ import string
 UNKNOWN = ''
 INIT = '[INIT]'
 
-
 def bigram_model(filepath: str) -> Bigram:
-    """
-    Build a bigram language model from text file using Laplace smoothing, normalization, and initial word probabilities.
 
-    :param filepath: Path to a text file.
-    :return: Nested dictionary where:
-             - Outer key is previous word (including INIT and UNKNOWN)
-             - Inner key is current word (including UNKNOWN)
-             - Value is P(current|previous) probability
-    """
-    # bigram counts
     bigram_counts: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    # previous counts
     prev_counts: Dict[str, int] = defaultdict(int)
 
-    vocab = set()  # words seen in the corpus
-
-    # 1) Count bigrams 
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
-            line = line.strip()
-            if not line:
+            words = line.split()
+            if not words:
                 continue
-
-            words = line.split()  
-            for w in words:
-                vocab.add(w)
 
             prev = INIT
             for curr in words:
@@ -60,28 +42,22 @@ def bigram_model(filepath: str) -> Bigram:
                 prev_counts[prev] += 1
                 prev = curr
 
-    # 2) Add UNKNOWN to the set of possible current words for smoothing
-    next_vocab = set(vocab)
-    next_vocab.add(UNKNOWN)
-    # smoothing adds 1 for each possible next word
-    smooth = len(next_vocab)  
-
-    # 3) Build probability table with Laplace smoothing + normalization
     model: Bigram = {}
+    unknown_probs: list[float] = []
 
-    # We want probabilities for every observed previous word (includes INIT and UNKNOWN)
-    prev_vocab = set(prev_counts.keys())
-    prev_vocab.add(INIT)
-    prev_vocab.add(UNKNOWN)
+    for prev, next_counts in bigram_counts.items():
+        row: dict[str, float] = {}
+        num_observed_next = len(next_counts)
+        denom = prev_counts[prev] + num_observed_next + 1
 
-    for prev in prev_vocab:
-        model[prev] = {}
-        denom = prev_counts.get(prev, 0) + smooth  
+        for curr, count in next_counts.items():
+            row[curr] = (count + 1) / denom
 
-        for curr in next_vocab:
-            temp = bigram_counts.get(prev, {}).get(curr, 0)
-            model[prev][curr] = (temp + 1) / denom  
+        row[UNKNOWN] = 1 / denom
+        unknown_probs.append(row[UNKNOWN])
+        model[prev] = row
 
+    model[UNKNOWN] = min(unknown_probs) if unknown_probs else 0.0
     return model
 
 def _is_punct(tok: str) -> bool:
@@ -90,18 +66,24 @@ def _is_punct(tok: str) -> bool:
 
 
 def _get_row(bigram_probs: Bigram, prev: str) -> dict[str, float]:
-    # Unknown previous word then use UNKNOWN row (per spec)
-    if prev in bigram_probs:
-        return bigram_probs[prev]
-    return bigram_probs.get(UNKNOWN, {})
+    row = bigram_probs.get(prev, {})
+    if isinstance(row, dict):
+        return row
+    return {}
 
 
 def _get_prob(bigram_probs: Bigram, prev: str, curr: str) -> float:
     row = _get_row(bigram_probs, prev)
-    # Unknown current word then use UNKNOWN column (per spec)
+
     if curr in row:
         return row[curr]
-    return row.get(UNKNOWN, 0.0)
+    if UNKNOWN in row:
+        return row[UNKNOWN]
+
+    unknown_prev = bigram_probs.get(UNKNOWN, 0.0)
+    if isinstance(unknown_prev, float):
+        return unknown_prev
+    return 0.0
 
 def sequence_generator(bigram_probs: Bigram, init_word: str, length: int = 20) -> tuple[list[str], float]:
     """
@@ -308,7 +290,4 @@ if __name__ == '__main__':
     filepath = 'dat/chronicles_of_narnia.txt'
     bigram_probs = bigram_model(filepath)
     sequence_generator(bigram_probs, 'You')
-
-    #testing purpose 
-    # row = bigram_probs['the']        # or any prev token
-    # print(sum(row.values()))
+    print(sequence_generator(bigram_probs, 'I'))
