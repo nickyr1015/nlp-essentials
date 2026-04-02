@@ -48,7 +48,7 @@ def bigram_model(filepath: str) -> Bigram:
     for prev, next_counts in bigram_counts.items():
         row: dict[str, float] = {}
         num_observed_next = len(next_counts)
-        denom = prev_counts[prev] + num_observed_next + 1
+        denom = prev_counts[prev] + num_observed_next 
 
         for curr, count in next_counts.items():
             row[curr] = (count + 1) / denom
