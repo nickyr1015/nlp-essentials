@@ -72,29 +72,29 @@ def document_similarity(word_embeddings, doc1, doc2):
 
     return cosine_similarity(doc1_vec, doc2_vec)
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
 
-    embeddings = read_word_embeddings("dat/word_embeddings.txt")
+    # embeddings = read_word_embeddings("dat/word_embeddings.txt")
 
-    print("test 1")
-    print(type(embeddings))
-    print(len(embeddings))
-    print("computer" in embeddings)
-    print(type(embeddings["computer"]))
-    print(embeddings["computer"].shape)
+    # print("test 1")
+    # print(type(embeddings))
+    # print(len(embeddings))
+    # print("computer" in embeddings)
+    # print(type(embeddings["computer"]))
+    # print(embeddings["computer"].shape)
 
-    print("test 2")
-    results = similar_words(embeddings, "computer", 0.5)
-    print(results[:10])  
+    # print("test 2")
+    # results = similar_words(embeddings, "computer", 0.5)
+    # print(results[:10])  
 
-    results = similar_words(embeddings, "computer", 0.5)
-    for i in range(len(results) - 1):
-        assert results[i][1] >= results[i + 1][1]
-    print("sorted correctly")   
+    # results = similar_words(embeddings, "computer", 0.5)
+    # for i in range(len(results) - 1):
+    #     assert results[i][1] >= results[i + 1][1]
+    # print("sorted correctly")   
 
 
-    print("test 3")
-    print(document_similarity(embeddings, "computer software hardware", "computer software"))
-    print(document_similarity(embeddings, "coffee tea sugar", "computer software website"))
-    print(document_similarity(embeddings, "Atlanta Seattle Chicago", "Houston Dallas Miami"))
+    # print("test 3")
+    # print(document_similarity(embeddings, "computer software hardware", "computer software"))
+    # print(document_similarity(embeddings, "coffee tea sugar", "computer software website"))
+    # print(document_similarity(embeddings, "Atlanta Seattle Chicago", "Houston Dallas Miami"))
