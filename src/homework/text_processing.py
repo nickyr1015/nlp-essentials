@@ -173,14 +173,8 @@ def chronicles_of_narnia(file_path="dat/chronicles_of_narnia.txt"):
 
 def regular_expressions(text):
 
+    #email 
 
-    # -------------------
-    # Email
-    # username@hostname.domain
-    # username/hostname: letters, numbers, . _ -
-    # must start/end with letter/number
-    # domain: com|org|edu|gov
-    # -------------------
     email_pattern = re.compile(
         r'^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?@'
         r'[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?'
@@ -189,15 +183,7 @@ def regular_expressions(text):
     if email_pattern.fullmatch(text):
         return "email"
 
-    # -------------------
-    # Date
-    # YYYY/MM/DD or YY/MM/DD
-    # YYYY-MM-DD or YY-MM-DD
-    # 4-digit year: 1951-2050
-    # 2-digit year: corresponds to 1951-2050 (51-99 => 1951-1999, 00-50 => 2000-2050)
-    # month: 1-12 (optional leading 0)
-    # day: 1-31 (optional leading 0) but must be valid for month/year
-    # -------------------
+    #date
     date_pattern = re.compile(
         r'^(?P<year4>19[5-9]\d|20[0-4]\d|2050|(?P<year2>\d{2}))'
         r'(?P<sep>[/-])'
@@ -223,14 +209,7 @@ def regular_expressions(text):
             except:
                 pass
 
-    # -------------------
-    # URL
-    # protocol://address
-    # protocol: http|https
-    # address: letters, hyphen, dots ONLY
-    # must start with letter/number
-    # must include at least one dot
-    # -------------------
+    #url
     url_pattern = re.compile(
         r'^(http|https)://'
         r'[A-Za-z0-9][A-Za-z.-]*'
@@ -239,24 +218,17 @@ def regular_expressions(text):
     if url_pattern.fullmatch(text):
         return "url"
 
-    # -------------------
-    # Cite
-    # Single: Lastname, YYYY
-    # Two: Lastname1 and Lastname2, YYYY
-    # Multi: Lastname1 et al., YYYY
-    # Lastnames capitalized and can have multiple parts (e.g., "Van Helsing")
-    # Year 1900-2024
-    # -------------------
-    name = r'[A-Z][a-zA-Z]*'                 # one capitalized word
-    lastname = rf'{name}(?:\s+{name})*'      # allow multiple words, each capitalized
+    #cite
+    name = r'[A-Z][a-zA-Z]*'                 
+    lastname = rf'{name}(?:\s+{name})*'      
 
     cite_pattern = re.compile(
         rf'^(?:'
-        rf'(?P<a1>{lastname})'                                   # single author
+        rf'(?P<a1>{lastname})'                                  
         rf'|'
-        rf'(?P<a2_1>{lastname})\s+and\s+(?P<a2_2>{lastname})'     # two authors
+        rf'(?P<a2_1>{lastname})\s+and\s+(?P<a2_2>{lastname})'     
         rf'|'
-        rf'(?P<a3>{lastname})\s+et\s+al\.'                        # multiple authors
+        rf'(?P<a3>{lastname})\s+et\s+al\.'                        
         rf'),\s+(?P<year>19\d{{2}}|20(?:0\d|1\d|2[0-4]))$'
     )
     cm = cite_pattern.fullmatch(text)
@@ -274,62 +246,63 @@ if __name__ == "__main__":
     data = chronicles_of_narnia("dat/chronicles_of_narnia.txt")
     pprint.pprint(data, width=100, sort_dicts=False)
 
-    tests = [
-    # ---------- email (valid) ----------
-    "a@b.com",
-    "john.doe_2@my-host.edu",
-    "x_y-z.9@abc_def.gov",
+#testing purpose 
+#     tests = [
+#     # ---------- email (valid) ----------
+#     "a@b.com",
+#     "john.doe_2@my-host.edu",
+#     "x_y-z.9@abc_def.gov",
 
-    # ---------- email (invalid) ----------
-    ".abc@host.com",          # starts with .
-    "abc.@host.com",          # ends with .
-    "abc@-host.com",          # hostname starts with -
-    "abc@host.xyz",           # bad domain
-    "abc@host..com",          # double dot (should fail with our stricter assumptions? depends on regex)
+#     # ---------- email (invalid) ----------
+#     ".abc@host.com",          # starts with .
+#     "abc.@host.com",          # ends with .
+#     "abc@-host.com",          # hostname starts with -
+#     "abc@host.xyz",           # bad domain
+#     "abc@host..com",          # double dot (should fail with our stricter assumptions? depends on regex)
 
-    # ---------- date (valid) ----------
-    "1951/1/1",
-    "2050-12-31",
-    "99/02/28",               # -> 1999-02-28
-    "00-2-29",                # -> 2000-02-29 (leap year)
+#     # ---------- date (valid) ----------
+#     "1951/1/1",
+#     "2050-12-31",
+#     "99/02/28",               # -> 1999-02-28
+#     "00-2-29",                # -> 2000-02-29 (leap year)
 
-    # ---------- date (invalid) ----------
-    "50/12/31",               # -> 2050 ok actually (this one is valid under your mapping)
-    "51/13/01",               # month 13
-    "51/00/10",               # month 0
-    "2023/02/29",             # not leap year
-    "2051-01-01",             # year out of range
-    "1950-12-31",             # year out of range
-    "1999-04-31",             # April has 30 days
+#     # ---------- date (invalid) ----------
+#     "50/12/31",               # -> 2050 ok actually (this one is valid under your mapping)
+#     "51/13/01",               # month 13
+#     "51/00/10",               # month 0
+#     "2023/02/29",             # not leap year
+#     "2051-01-01",             # year out of range
+#     "1950-12-31",             # year out of range
+#     "1999-04-31",             # April has 30 days
 
-    # ---------- url (valid) ----------
-    "http://a.b",
-    "https://narnia.com",
-    "https://my-site.example",  # NOTE: this will FAIL because we require only letters/hyphen/dots; "example" ok, but TLD doesn't need to be real
-    "http://abc-def.ghi.jkl",
+#     # ---------- url (valid) ----------
+#     "http://a.b",
+#     "https://narnia.com",
+#     "https://my-site.example",  # NOTE: this will FAIL because we require only letters/hyphen/dots; "example" ok, but TLD doesn't need to be real
+#     "http://abc-def.ghi.jkl",
 
-    # ---------- url (invalid) ----------
-    "ftp://a.b",              # bad protocol
-    "http://-abc.com",        # starts with -
-    "http://abc",             # no dot
-    "https://ab_c.com",       # underscore not allowed in URL address
-    "https://a..b",           # double dot (your regex may allow; depends how strict you want)
+#     # ---------- url (invalid) ----------
+#     "ftp://a.b",              # bad protocol
+#     "http://-abc.com",        # starts with -
+#     "http://abc",             # no dot
+#     "https://ab_c.com",       # underscore not allowed in URL address
+#     "https://a..b",           # double dot (your regex may allow; depends how strict you want)
 
-    # ---------- cite (valid) ----------
-    "Smith, 2023",
-    "Smith and Jones, 2023",
-    "Smith et al., 2023",
-    "Van Helsing, 1900",
-    "De La Cruz and Smith, 2024",
+#     # ---------- cite (valid) ----------
+#     "Smith, 2023",
+#     "Smith and Jones, 2023",
+#     "Smith et al., 2023",
+#     "Van Helsing, 1900",
+#     "De La Cruz and Smith, 2024",
 
-    # ---------- cite (invalid) ----------
-    "smith, 2023",            # not capitalized
-    "Smith and jones, 2023",  # second not capitalized
-    "Smith et al, 2023",      # missing period after al.
-    "Smith and Jones et al., 2023",  # not allowed format
-    "Smith, 1899",            # year too early
-    "Smith, 2025",            # year too late
-]
+#     # ---------- cite (invalid) ----------
+#     "smith, 2023",            # not capitalized
+#     "Smith and jones, 2023",  # second not capitalized
+#     "Smith et al, 2023",      # missing period after al.
+#     "Smith and Jones et al., 2023",  # not allowed format
+#     "Smith, 1899",            # year too early
+#     "Smith, 2025",            # year too late
+# ]
 
 # for t in tests:
 #     print(f"{t!r:35} -> {regular_expressions(t)}")
